@@ -48,7 +48,13 @@ const registerUser = asyncHandler(async (req, res) => {
     // console.log(req.files)
 
     const avatarLocalPath = req.files?.avatar[0].path
-    const coverImageLocalPath = req.files?.coverImage[0].path
+    // const coverImageLocalPath = req.files?.coverImage[0].path
+
+    
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
 
     if (!avatarLocalPath) {
         throw new ApiError(400, "Avatar file required!")
@@ -67,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         avatar: avatar.url,
-        coverImage: coverImage.url || ""
+        coverImage: coverImage?.url || ""
     })
 
     const createdUser = await User.findById(user._id).select(
@@ -78,7 +84,9 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Sorry, Something went wrong while Registering the User") 
     }
 
-    res.status(201).json(200, createdUser, "User register successfully")
+    res.status(201).json(
+        new ApiResponse(200, createdUser, "User register successfully")
+    )
 });
 
 export { registerUser };
